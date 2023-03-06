@@ -1,0 +1,23 @@
+# Default scripts
+scripts/3DScreenshot.scm
+scripts/backup_working.scm
+scripts/elsamuko-national-geographic.scm
+scripts/functions.scm
+scripts/gimp-reflection.scm
+scripts/image-subdivide.scm
+scripts/midnightSepia_0.scm
+scripts/pencil-drawing-from-photo.scm
+scripts/photo-finish.scm
+scripts/plastiwrap.scm
+scripts/quick-sketch_1.scm
+scripts/shadows-highlights-2.4.scm
+scripts/slice-and-join.scm
+
+# Custom installed scripts
+scripts/gc-shadow.scm
+scripts/export_layers.scm
+scripts/watermark.scm
+scripts/FU_watermark.scm
+
+# BaconWizard17 scripts
+scripts/MUASkinPreview.scm
