@@ -1,8 +1,8 @@
-; Marvel Ultimate Alliance 2016 (1) normal map conversion
+; Marvel Ultimate Alliance green normal maps to common blue normal maps
 (define (script-fu-mua-normal3 Image Drawable)
 
     ; Some extra variables for the "math". Unused as long as marked as comments.
-    (let* ((tmp 0)(tmp2 0)(map 0)(Red 0)(Green 0)(Blue 0)(Alpha 0)(GT 0)(RT 0)(G 0)(R 0))
+    (let* ((tmp 0)(tmp2 0)(nmap 0)(Red 0)(Green 0)(Blue 0)(Alpha 0)(GT 0)(RT 0)(G 0)(R 0))
 
         (gimp-image-undo-group-start Image)
 
@@ -10,9 +10,11 @@
 
     (define tmp (plug-in-decompose 1 Image Drawable "RGBA" 0))
 
+    ; Alpha
     (gimp-context-set-background '(255 255 255))
-    (set! Red (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (car (cdr (cdr (cdr tmp)))) )) Image) ))
-    (set! Green (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (car (cdr tmp)) )) Image) ))
+    (set! Red (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (cadddr tmp) )) Image) ))
+    ; Green
+    (set! Green (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (cadr tmp) )) Image) ))
     (set! Alpha (car (gimp-layer-new Image (car (gimp-image-width Image)) (car (gimp-image-height Image)) 2 "Alpha" 100 0)))
     (gimp-drawable-fill Alpha FILL-BACKGROUND)
 
@@ -62,9 +64,9 @@
     ; (gimp-image-remove-layer Image R)
     ; (gimp-image-remove-layer Image G)
 
-    (set! map (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (car tmp2) )) Image) ))
-    (gimp-item-set-name map "Normal")
-    (gimp-image-insert-layer Image map 0 -1)
+    (set! nmap (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (car tmp2) )) Image) ))
+    (gimp-item-set-name nmap "Normal")
+    (gimp-image-insert-layer Image nmap 0 -1)
 
     (gimp-displays-flush)
 
@@ -77,7 +79,7 @@
 ; populate script registration information
 (script-fu-register "script-fu-mua-normal3"
     "MUA Normal Map Conversion Reverse"
-    "Convert a DXT5nm map texture (greenish) to a normal map texture (blueish) for Marvel Ultimate Alliance 2016. Adds it on a new Layer."
+    "Convert a DXT5nm map texture (greenish) to a normal map texture (blueish). Blue channel information is missing and not constructed (plain white). Adds it on a new Layer."
     "ak2yny"
     "ak2yny"
     "October 2022"
