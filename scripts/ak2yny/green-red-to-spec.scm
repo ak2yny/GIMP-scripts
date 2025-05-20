@@ -2,13 +2,14 @@
 ; Red is reflection/white.
 (define (script-fu-gr-to-spec image layer)
 
-    (let* ((red 0)(green 0)(gr 0)(spec 0))
+    (let* (
+        (red (car (gimp-layer-copy gr 0)))
+        (green (car (gimp-layer-copy gr 0)))
+        (gr (aref (cadr (gimp-image-get-layers image)) 0))
+        )
 
         (gimp-image-undo-group-start image)
 
-    (set! gr (aref (cadr (gimp-image-get-layers image)) 0))
-    (set! red (car (gimp-layer-copy gr 0)))
-    (set! green (car (gimp-layer-copy gr 0)))
     (gimp-image-insert-layer image green 0 1)
     (gimp-image-insert-layer image red 0 2)
 
@@ -45,7 +46,7 @@
     "Use a green/red texture map to create a monochrome red/white specular map."
     "ak2yny"
     "ak2yny"
-    "March 2023"
+    "April 2025"
     "*"
     SF-IMAGE        "Image"       0
     SF-DRAWABLE     "Layer"       0

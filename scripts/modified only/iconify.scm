@@ -147,7 +147,7 @@
 ; it could be extended to work with palettized images, thus only creating
 ; layers for depths up to the current image depth
 (script-fu-register "script-fu-iconify"
-"<Image>/Script-Fu/Iconify"
+"Iconify"
 "Use the current layer of the current image to create a multi-sized, multi-depth Windows icon file"
 "Giuseppe Bilotta, Fixed By Roland Clobus for gimp 2.8+"
 "Giuseppe Bilotta, Fixed By Roland Clobus for gimp 2.8+"
@@ -155,3 +155,6 @@
 "RGB*"
 SF-IMAGE "Image to iconify" 0
 SF-DRAWABLE "Layer to iconify" 0)
+
+; register the script within gimp menu
+(script-fu-menu-register "script-fu-iconify" "<Image>/Script-Fu")

@@ -1,22 +1,23 @@
-; Marvel Ultimate Alliance green normal maps to common blue normal maps
-(define (script-fu-mua-normal3 Image Drawable)
+#!/usr/bin/env gimp-script-fu-interpreter-3.0
 
-    ; Some extra variables for the "math". Unused as long as marked as comments.
-    (let* ((tmp 0)(tmp2 0)(nmap 0)(Red 0)(Green 0)(Blue 0)(Alpha 0)(GT 0)(RT 0)(G 0)(R 0))
+; Marvel Ultimate Alliance green normal maps to common blue normal maps
+; In script-fu-interpreter-3.0, return values (vector or value) changed, as well as whether vectors or values can be used as arguments
+
+(define (script-fu-mua-normal3 Image Drawables)
+    (script-fu-use-v3)
+
+    (let* (
+        (tmp (car (plug-in-decompose 1 Image Drawables "rgba" 1)))
+        (Red (gimp-image-get-layer-by-name tmp "alpha"))
+        (Green (gimp-image-get-layer-by-name tmp "green"))
+        (Alpha (gimp-layer-new tmp "alpha_new" (gimp-image-get-width Image) (gimp-image-get-height Image) 2 100))
+    )
 
         (gimp-image-undo-group-start Image)
 
-    (gimp-layer-add-alpha Drawable)
-
-    (define tmp (plug-in-decompose 1 Image Drawable "RGBA" 0))
-
-    ; Alpha
-    (gimp-context-set-background '(255 255 255))
-    (set! Red (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (cadddr tmp) )) Image) ))
-    ; Green
-    (set! Green (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (cadr tmp) )) Image) ))
-    (set! Alpha (car (gimp-layer-new Image (car (gimp-image-width Image)) (car (gimp-image-height Image)) 2 "Alpha" 100 0)))
-    (gimp-drawable-fill Alpha FILL-BACKGROUND)
+    ; Add alpha channel as layer (required for script-fu-interpreter-3.0)
+    (gimp-drawable-fill Alpha FILL-WHITE)
+    (gimp-image-insert-layer tmp Alpha 0 -1)
 
     ; Re-creating a Blue channel with script-fu fails.
     ; SQRT, however that's done, is missing. The result is worse than pure white
@@ -28,19 +29,19 @@
     ; (loop (cdr layers))))
 
     ; Define extra layers for the "math"
-    ; (set! GT (car (gimp-layer-copy Green TRUE)) )
+    ; (define GT (car (gimp-layer-copy Green TRUE)) )
     ; (gimp-item-set-name Green "GreenT")
     ; (gimp-item-set-name GT "GreenT2")
-    ; (set! RT (car (gimp-layer-copy Red TRUE)) )
+    ; (define RT (car (gimp-layer-copy Red TRUE)) )
     ; (gimp-item-set-name Red "RedT")
     ; (gimp-item-set-name RT "RedT2")
 
     ; Do the "math" (multiply, subtract, invert - result should be square rooted but don't know how)
-    ; (gimp-image-insert-layer Image Green 0 0)
+    ; (gimp-image-insert-layer Image Green 0 0) fails
     ; (gimp-image-insert-layer Image GT 0 1)
     ; (gimp-layer-set-mode Green LAYER-MODE-MULTIPLY)
     ; (set! G (car (gimp-layer-new-from-visible Image Image "Green")))
-    ; (gimp-image-insert-layer Image Red 0 0)
+    ; (gimp-image-insert-layer Image Red 0 0) fails
     ; (gimp-image-insert-layer Image RT 0 1)
     ; (gimp-layer-set-mode Red LAYER-MODE-MULTIPLY)
     ; (set! R (car (gimp-layer-new-from-visible Image Image "Red")))
@@ -51,7 +52,9 @@
     ; (gimp-image-insert-layer Image Blue 0 0)
     ; (gimp-drawable-invert Blue FALSE)
 
-    (define tmp2 (plug-in-drawable-compose 1 Image Red Green Alpha Alpha "RGBA"))
+    ; Compose the new narmal map from the channels as layers
+    ; Note: Blue channel has very little information and is very difficult to restore
+    (define tmp2 (plug-in-drawable-compose 1 tmp (vector Red) Green Alpha Alpha "rgb"))
     ; Use Blue channel if defined by "math"
     ; (define tmp2 (plug-in-drawable-compose 1 Image Red Green Blue Alpha "RGBA"))
 
@@ -64,9 +67,15 @@
     ; (gimp-image-remove-layer Image R)
     ; (gimp-image-remove-layer Image G)
 
-    (set! nmap (car (gimp-layer-new-from-drawable (car ( gimp-image-get-active-layer (car tmp2) )) Image) ))
-    (gimp-item-set-name nmap "Normal")
-    (gimp-image-insert-layer Image nmap 0 -1)
+    ; Copy the composed layer from the temporary image
+    (define nm (gimp-layer-new-from-drawable (vector-ref (gimp-image-get-layers tmp2) 0) Image))
+    (gimp-item-set-name nm "Normal")
+    (gimp-image-insert-layer Image nm 0 -1)
+    ; might want to add an alpha channel
+
+    ; Clean up the images
+    (gimp-image-delete tmp)
+    (gimp-image-delete tmp2)
 
     (gimp-displays-flush)
 
@@ -77,15 +86,14 @@
 )
 
 ; populate script registration information
-(script-fu-register "script-fu-mua-normal3"
+(script-fu-register-filter "script-fu-mua-normal3"
     "MUA Normal Map Conversion Reverse"
     "Convert a DXT5nm map texture (greenish) to a normal map texture (blueish). Blue channel information is missing and not constructed (plain white). Adds it on a new Layer."
     "ak2yny"
     "ak2yny"
-    "October 2022"
-    "*"
-    SF-IMAGE        "Image"                           0
-    SF-DRAWABLE     "Drawable"                        0
+    "April 2025"
+    "RGBA"
+    SF-ONE-DRAWABLE
 )
 
 ; register the script within gimp menu

@@ -3,17 +3,19 @@
 ; Green/magenta must be top layer, Normal coloured must be second layer.
 (define (script-fu-gm-alpha-mask image layer)
 
-    (let* ((magenta 0)(green 0)(mask 0)(pic 0)(pic2 0))
+    (let* (
+        (mask (aref (cadr (gimp-image-get-layers image)) 0))
+        (magenta (car (gimp-layer-copy mask 0)))
+        (green (car (gimp-layer-copy mask 0)))
+        (pic (aref (cadr (gimp-image-get-layers image)) 1))
+        (pic2 0)
+        )
 
         (gimp-image-undo-group-start image)
 
-    (set! mask (aref (cadr (gimp-image-get-layers image)) 0))
-    (set! pic (aref (cadr (gimp-image-get-layers image)) 1))
     (gimp-layer-add-alpha pic)
     (set! pic2 (car (gimp-layer-copy pic 0)))
     (gimp-image-insert-layer image pic2 0 1)
-    (set! magenta (car (gimp-layer-copy mask 0)))
-    (set! green (car (gimp-layer-copy mask 0)))
     (gimp-image-insert-layer image magenta 0 3)
     (gimp-image-insert-layer image green 0 4)
     (plug-in-colortoalpha RUN-NONINTERACTIVE image magenta '(255 0 255))
@@ -44,11 +46,12 @@
     "Use a green/magenta image to create an alpha channel on a normal coloured image. Magenta is alpha. Magenta/Green must be top layer, Normal coloured must be second layer."
     "ak2yny"
     "ak2yny"
-    "May 2022"
+    "April 2025"
     "*"
     SF-IMAGE        "Image"       0
     SF-DRAWABLE     "Layer"       0
 )
+;; SF-ONE-OR-MORE-DRAWABLE
 
 ; register the script within gimp menu
 (script-fu-menu-register "script-fu-gm-alpha-mask" "<Image>/Script-Fu")
