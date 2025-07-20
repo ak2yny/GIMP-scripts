@@ -31,8 +31,10 @@
         (let*(
             (file-path (string-append path "/" (gimp-item-get-name (car layers)) ".png"))
             (vis (gimp-layer-new-from-visible image image file-path))
+            (file-path-tga (string-append path "/" (gimp-item-get-name (car layers)) ".tga"))
             )
             (file-png-export RUN-NONINTERACTIVE image file-path)
+            (file-tga-export RUN-NONINTERACTIVE image file-path-tga)
         )
         (gimp-image-remove-layer image outline)
         (gimp-item-set-visible (car layers) 0)

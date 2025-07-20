@@ -1,3 +1,5 @@
+#!/usr/bin/env gimp-script-fu-interpreter-3.0
+
 ;Iconify.scm
 ;===========================
 ;Author...Giuseppe Bilotta
@@ -5,7 +7,7 @@
 ;http://www.gimptalk.com/forum/broken-scripts-t33501.html
 ;Resubmission to Gimp Plugin Registry & GimpTalk by Gargy
 ;Modified for Gimp 2.8 by Roland Clobus
-;Modified by ak2yny to add support up to 1024
+;Modified for Gimp 3.0 by ak2yny + to add support up to 1024
 ;------------
 ;Description...: Iconify plug-in converts a single layer of a single image into a multi-layered image ready to be saved as a Windows icon.
 ;The new image will contain all standard sizes (16x16, 32x32, 48x48) at all standard bit depths (16 colors, 256 colors, 32-bit RGBA), with transparency support.
@@ -15,11 +17,12 @@
 ; Note: This script has been modified accordingly with the changes stated here: http://www.aqua-soft.org/forum/topic/40999-iconify-plug-in-for-the-gimp/
 ;
 ; It converts an image into a Windows/Macintosh icon
-(define (script-fu-iconify img drawable)
+(define (script-fu-iconify img drawables)
+(script-fu-use-v3)
 ; Create a new image. It's also easy to add
 ; 128x128 Macintosh icons, or other sizes
 (let* (
-    (new-img (car (gimp-image-new 256 256 0)))
+    (new-img (gimp-image-new 256 256 0))
     (work-layer 0)
     (big-layer 0)
     (layer-x 0)
@@ -35,10 +38,10 @@
     (eigth-bit 0)
     (four-bit 0)
     )
-(gimp-item-set-name new-img (car (gimp-image-get-name img)))
+(gimp-item-set-name new-img (gimp-image-get-name img))
 
 ; Create a new layer
-(set! work-layer (car (gimp-layer-new-from-drawable drawable new-img)))
+(set! work-layer (gimp-layer-new-from-drawable (vector-ref drawables 0) new-img))
 
 ; Give it a name
 (gimp-item-set-name work-layer "Work layer")
@@ -53,8 +56,8 @@
 ; Now, resize the layer so that it is square,
 ; by making the shorter dimension the same as
 ; the longer one. The layer content is centered.
-(set! layer-x (car (gimp-drawable-get-width work-layer)))
-(set! layer-y (car (gimp-drawable-get-height work-layer)))
+(set! layer-x (gimp-drawable-get-width work-layer))
+(set! layer-y (gimp-drawable-get-height work-layer))
 (set! max-dim (max layer-x layer-y))
 (gimp-layer-resize work-layer max-dim max-dim (/ (- max-dim layer-x) 2) (/ (- max-dim layer-y) 2))
 
@@ -66,7 +69,7 @@
 
 (define (resize-to-dim dim)
     (unless (< max-dim dim)
-        (set! temp-layer (car (gimp-layer-copy work-layer 0)))
+        (set! temp-layer (gimp-layer-copy work-layer 0))
         (gimp-item-set-name temp-layer "icon")
         (gimp-image-insert-layer new-img temp-layer 0)
         (gimp-item-transform-scale temp-layer 0 0 dim dim)
@@ -75,7 +78,7 @@
 (for-each (lambda (dim) (resize-to-dim dim)) '(16 32 48 64 72 96 128 256 512 1024))
 
 ; Create the big layer, but do not add it yet
-; (set! big-layer (car (gimp-layer-copy work-layer 0)))
+; (set! big-layer (gimp-layer-copy work-layer 0))
 ; (gimp-item-set-name big-layer "Big")
 
 ; We can now get rid of the working layer and fit the image to the layers
@@ -97,7 +100,7 @@
 ; Observe that no dithering is done. This is intentional, since
 ; it gives the best results.
 ; (define (palettize-image num)
-;   (set! temp-img (car (gimp-image-duplicate new-img)))
+;   (set! temp-img (gimp-image-duplicate new-img))
 ;   (gimp-image-convert-indexed temp-img 0 0 num TRUE TRUE "")
 ;   temp-img)
 ; (define (plop-image temp-img)
@@ -105,10 +108,10 @@
 ;   (set! layernum (car layers))
 ;   (set! layers-array (cadr layers))
 ;   (while (> layernum 0)
-;       (set! layer (car
+;       (set! layer
 ;           (gimp-layer-new-from-drawable
 ;               (aref layers-array (- layernum 1))
-;               new-img)))
+;               new-img))
 ;       (gimp-image-insert-layer new-img layer 0)
 ;       (set! layernum (- layernum 1)))
 ;   (gimp-image-delete temp-img))
@@ -126,7 +129,7 @@
 (gimp-display-new new-img)
 
 ; We save the icon
-(file-ico-export RUN-NONINTERACTIVE new-img (string-append (car (gimp-image-get-file img)) ".ico"))
+(file-ico-export RUN-NONINTERACTIVE new-img (string-append (gimp-image-get-file img) ".ico"))
 
 ; And we flush the display
 (gimp-displays-flush)
@@ -135,15 +138,15 @@
 ; TODO the plugin currently only works with truecolor images
 ; it could be extended to work with palettized images, thus only creating
 ; layers for depths up to the current image depth
-(script-fu-register "script-fu-iconify"
-"Iconify"
-"Use the current layer of the current image to create a multi-sized, multi-depth Windows icon file"
-"Giuseppe Bilotta, Fixed By Roland Clobus for gimp 2.8+, ak2yny for gimp 3"
-"Giuseppe Bilotta, Fixed By Roland Clobus for gimp 2.8+, ak2yny for gimp 3"
-"20250720"
-"RGB*"
-SF-IMAGE "Image to iconify" 0
-SF-DRAWABLE "Layer to iconify" 0)
+(script-fu-register-filter "script-fu-iconify"
+    "Iconify"
+    "Use the current layer of the current image to create a multi-sized, multi-depth Windows icon file"
+    "Giuseppe Bilotta, Roland Clobus for gimp 2.8+, ak2yny for gimp 3"
+    "Giuseppe Bilotta, Roland Clobus for gimp 2.8+, ak2yny for gimp 3"
+    "20250720"
+    "*"
+    SF-ONE-DRAWABLE
+)
 
 ; register the script within gimp menu
 (script-fu-menu-register "script-fu-iconify" "<Image>/Script-Fu")
