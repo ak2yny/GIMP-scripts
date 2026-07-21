@@ -3,6 +3,8 @@
 
 (let* ((copy 0))
 
+	(gimp-context-set-opacity 100)
+
     (gimp-image-undo-group-start image)
 
     (gimp-image-select-item image 0 layer)

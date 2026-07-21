@@ -6,6 +6,7 @@
 
 (define (script-fu-save-layers-hud128 image drawables path)
     (script-fu-use-v3)
+	(gimp-context-set-opacity 100)
 
     (let ((outline 0) (group (vector-ref drawables 0)))
 
